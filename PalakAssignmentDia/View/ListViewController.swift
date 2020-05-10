@@ -14,13 +14,30 @@ class ListViewController: UIViewController {
   //MARK: IBOutlets
   @IBOutlet var colView: UICollectionView!
   let presenter = PagePresenter()
+   let refreshControl = UIRefreshControl()
   
   override func viewDidLoad() {
     super.viewDidLoad()
     presenter.pageProtocol = self
     presenter.getPageData()
+    colView.refreshControl = refreshControl
+    refreshControl.tintColor = UIColor.white
+    refreshControl.addTarget(self, action: #selector(refreshAPIData(_:)), for: .valueChanged)
    
   }
+  @objc private func refreshAPIData(_ sender: Any) {
+    print(loadNumber)
+    loadNumber = 1
+    presenter.getPageData()
+    
+  }
+  override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+    
+    self.view.layoutIfNeeded()
+    colView.reloadData()
+    
+  }
+  
   
 }
 
@@ -63,6 +80,8 @@ extension ListViewController: UICollectionViewDelegate,UICollectionViewDataSourc
 extension ListViewController: PagePresenterProtocol{
   
   func loadCollectionView() {
+    self.refreshControl.endRefreshing()
+    self.refreshControl.isHidden = true
     colView.reloadData()
   }
   func setTopNavigation(){
